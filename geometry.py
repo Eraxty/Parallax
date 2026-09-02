@@ -1,15 +1,17 @@
-import math
-
 from dataclasses import dataclass
 
 
 @dataclass
 class Eye:
-    position: tuple[float, float]
-    direction: tuple[float, float, float]
+    position: tuple
+    direction: tuple
+    yaw: float
+    pitch: float
 
 
 def gaze_direction(yaw_deg, pitch_deg):
+    import math
+
     yaw = math.radians(yaw_deg)
     pitch = math.radians(pitch_deg)
 
@@ -31,19 +33,17 @@ def get_eyes(data):
     right = data["right_eye"]
 
     left_eye = Eye(
-        position = tuple(left["position"]),
-        direction = gaze_direction(
-            left["yaw_deg"],
-            left["pitch_deg"],
-        ),
+        tuple(left["position"]),
+        gaze_direction(left["yaw_deg"], left["pitch_deg"]),
+        left["yaw_deg"],
+        left["pitch_deg"],
     )
 
     right_eye = Eye(
-        position = tuple(right["position"]),
-        direction = gaze_direction(
-            right["yaw_deg"],
-            right["pitch_deg"],
-        ),
+        tuple(right["position"]),
+        gaze_direction(right["yaw_deg"], right["pitch_deg"]),
+        right["yaw_deg"],
+        right["pitch_deg"],
     )
 
     return left_eye, right_eye
