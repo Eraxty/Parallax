@@ -60,6 +60,7 @@ def main():
             if msg_type == "status" and data.get("level") == "info":
                 cw = data.get("camera_width")
                 ch = data.get("camera_height")
+                
                 if cw and ch:
                     camera = Camera(cw, ch)
                     print(f"camera: {cw}x{ch}")

@@ -4,26 +4,32 @@ from PIL import Image
 from pathlib import Path
 
 folder = input("Folder with view images: ")
-images = [np.array(Image.open(p).convert("RGB")) for p in sorted(Path(folder).glob("*.png"))]
+views = [np.array(Image.open(p).convert("RGB")) for p in sorted(Path(folder).glob("*.png"))]
 
-print(f"loaded {len(images)} views")
+print(f"loaded {len(views)} views")
 
 lpi = float(input("LPI: "))
 dpi = float(input("DPI: "))
 slant = float(input("Slant: "))
 
-nv = len(images)
-h, w = images[0].shape[:2]
+n_views = len(views)
+height, width = views[0].shape[:2]
 
-xx, yy = np.meshgrid(np.arange(w, dtype = np.float64), np.arange(h, dtype = np.float64))
-xx += yy * math.tan(math.radians(slant))
+cols = np.arange(width, dtype = np.float64)
+rows = np.arange(height, dtype = np.float64)
+grid_x, grid_y = np.meshgrid(cols, rows)
 
-idx = ((xx / (dpi / lpi) % 1.0) * nv).astype(np.int32) % nv
+slant_rad = math.radians(slant)
+grid_x += grid_y * math.tan(slant_rad)
 
-xx_c = np.clip(xx, 0, w - 1).astype(np.int32)
-yy_c = np.clip(yy, 0, h - 1).astype(np.int32)
+lens_pitch = dpi / lpi
+view_id = ((grid_x / lens_pitch) % 1.0) * n_views
+view_id = view_id.astype(np.int32) % n_views
 
-result = np.stack(images, axis = 0)[idx, yy_c, xx_c]
+x_index = np.clip(grid_x, 0, width - 1).astype(np.int32)
+y_index = np.clip(grid_y, 0, height - 1).astype(np.int32)
 
-Image.fromarray(result).save("interlaced.png")
+interlaced = np.stack(views, axis = 0)[view_id, y_index, x_index]
+
+Image.fromarray(interlaced).save("interlaced.png")
 print("saved interlaced.png")
