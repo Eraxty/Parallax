@@ -7,7 +7,45 @@ import './App.css'
 function App() {
 
   return (
-    <div></div>
+    <div>
+      <Upload_button/>
+      <View_button/>
+    </div>
+  )}
+
+
+function Upload_button() {
+
+  function onuploadclick(){
+    document.getElementById("fileInput").click()
+    alert("uploaded")
+}
+
+  return(
+    <div>
+      <input 
+      id = "fileInput"
+      type = "file" 
+      style = {{ display: "none" }}
+      />
+
+      <button onClick = {onuploadclick}>
+        Upload
+      </button>
+    </div>
+  )
+}
+
+function View_button() {
+
+  function onviewclick(){
+  alert("view")
+}
+
+  return(
+    <button onClick = {onviewclick}>
+      View
+    </button>
   )
 }
 
