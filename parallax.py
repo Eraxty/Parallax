@@ -85,10 +85,10 @@ def main():
             nx, ny = camera.normalize((eye_x, eye_y))
 
             print(
-                f"raw=({eye_x:.1f}, {eye_y:.1f})  "
-                f"norm=({nx:.3f}, {ny:.3f})  "
-                f"yaw={left_eye.yaw:.1f}/{right_eye.yaw:.1f}  "
-                f"pitch={left_eye.pitch:.1f}/{right_eye.pitch:.1f}"
+                f"raw = ({eye_x:.1f}, {eye_y:.1f})"
+                f"norm = ({nx:.3f}, {ny:.3f})"
+                f"yaw = {left_eye.yaw:.1f}/{right_eye.yaw:.1f}"
+                f"pitch = {left_eye.pitch:.1f}/{right_eye.pitch:.1f}"
             )
 
             target_x = nx * SENSITIVITY_X
