@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>View Image</title>
+</head>
+
+<body>
+  <h1>Your Image</h1>
+
+  <img id = "image" style="max-width: 80%;">
+
+  <script>
+    const image = localStorage.getItem("image")
+
+    if (image) {
+      document.getElementById("image").src = image
+    } 
+    else {
+      document.body.innerHTML = "<h1>No image uploaded</h1>"
+    }
+  </script>
+</body>
+</html>
