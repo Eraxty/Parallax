@@ -1,69 +1,115 @@
+import { useState } from 'react'
 import './App.css'
 
 function App() {
-  return (
-    <main className = "landing-page">
-      <section className = "hero-section" aria-labelledby = "page-title">
-        <div className = "hero-copy">
-          <p className = "eyebrow">PARALLAX</p>
-          <h1 id = "page-title">Your images,<br /><em>in motion.</em></h1>
-          <p className = "intro">Upload an image to get started.</p>
-        </div>
-        <div className = "action-panel">
-          <UploadButton />
-          <ViewButton />
-        </div>
-      </section>
-    </main>
-  )
-}
+  const [lpi, setLpi] = useState(60)
+  const [dpi, setDpi] = useState(600)
+  const [slant, setSlant] = useState(8)
+  const [message, setMessage] = useState('')
+  const [busy, setBusy] = useState(false)
 
-function UploadButton() {
-  function onUploadClick() {
-    document.getElementById('fileInput').click()
-  }
+  async function createImage(event) {
+    event.preventDefault()
 
-  function onFileChange(event) {
-    const file = event.target.files[0]
+    const form = new FormData(event.currentTarget)
+    const images = form.getAll('images').filter((image) => image.size > 0)
 
-    if (file) {
-      const reader = new FileReader()
+    if (images.length < 2) {
+      setMessage('Choose at least two images.')
+      return
+    }
 
-      reader.onload = function () {
-        localStorage.setItem('image', reader.result)
-        window.location.href = '/view.html'
+    setBusy(true)
+    setMessage('')
+
+    try {
+      const response = await fetch('/interlace', {
+        method: 'POST',
+        body: form,
+      })
+
+      if (!response.ok) {
+        const reason = (await response.text()).trim()
+        throw new Error(reason || `Request failed (${response.status}).`)
       }
 
-      reader.readAsDataURL(file)
+      const image = await response.blob()
+      const url = URL.createObjectURL(image)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'interlaced.png'
+      link.click()
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+      setMessage('Downloaded interlaced.png')
+    } catch (error) {
+      if (error instanceof TypeError) {
+        setMessage('Could not reach Python. Check the terminal running the app.')
+      } else {
+        setMessage(error.message)
+      }
+    } finally {
+      setBusy(false)
     }
   }
 
   return (
-    <>
-      <input id = "fileInput" type = "file" accept = "image/*" hidden onChange = { onFileChange } />
-      <button className = "action-button primary-action" onClick = { onUploadClick }>
-        <span>Upload image</span>
-      </button>
-    </>
-  )
-}
+    <main className="page">
+      <header>
+        <a className="wordmark" href="/">Parallax</a>
+      </header>
 
-function ViewButton() {
-  function onViewClick() {
-    const image = localStorage.getItem('image')
+      <form onSubmit={createImage}>
+        <h1>Interlace images</h1>
 
-    if (image) {
-      window.open(image, '_blank')
-    }
-    else {
-      alert('No image uploaded')
-    }
-  }
+        <label className="file-field">
+          <span>Images</span>
+          <input name="images" type="file" accept="image/*" multiple />
+          <small>Choose two or more images</small>
+        </label>
 
-  return (
-    <button className = "action-button secondary-action" onClick = { onViewClick }>
-      <span>View current image</span>
-    </button>
+        <label className="slider-field">
+          <span>LPI <output>{lpi}</output></span>
+          <input
+            name="lpi"
+            type="range"
+            min="20"
+            max="160"
+            value={lpi}
+            onChange={(event) => setLpi(Number(event.target.value))}
+          />
+        </label>
+
+        <label className="slider-field">
+          <span>DPI <output>{dpi}</output></span>
+          <input
+            name="dpi"
+            type="range"
+            min="150"
+            max="1200"
+            step="10"
+            value={dpi}
+            onChange={(event) => setDpi(Number(event.target.value))}
+          />
+        </label>
+
+        <label className="slider-field">
+          <span>Slant <output>{slant}°</output></span>
+          <input
+            name="slant"
+            type="range"
+            min="-20"
+            max="20"
+            value={slant}
+            onChange={(event) => setSlant(Number(event.target.value))}
+          />
+        </label>
+
+        <button type="submit" disabled={busy}>
+          {busy ? 'Working…' : 'Create image'}
+        </button>
+        <p className="message" role="status">{message}</p>
+      </form>
+    </main>
   )
 }
 

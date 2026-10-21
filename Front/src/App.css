@@ -1,60 +1,102 @@
-.landing-page {
+.page {
+  width: min(100% - 40px, 520px);
   min-height: 100vh;
+  margin: 0 auto;
+}
+
+header {
+  height: 64px;
   display: flex;
-  justify-content: center;
   align-items: center;
-  background: #000;
-  color: #ff7147;
+  border-bottom: 1px solid #e5e5e5;
 }
 
-.hero-section {
-  width: 460px;
-  max-width: 90%;
-  text-align: center;
+.wordmark {
+  color: #242424;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
 }
 
-.eyebrow {
-  color: #ff7147;
-  letter-spacing: 3px;
+form {
+  padding: 48px 0;
 }
 
 h1 {
-  font-family: Georgia, serif;
-  font-size: 64px;
-  font-weight: normal;
-  line-height: 1;
+  margin: 0 0 32px;
+  color: #242424;
+  font-size: 28px;
+  font-weight: 550;
+  letter-spacing: -0.5px;
 }
 
-h1 em {
-  color: #ff7147;
+.file-field,
+.slider-field {
+  display: block;
+  margin: 0 0 28px;
+  color: #333;
+  font-size: 14px;
 }
 
-.intro {
-  color: #ff7147;
-  margin-bottom: 30px;
-}
-
-.action-panel {
+.file-field > span,
+.slider-field > span {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
-.action-button {
-  padding: 22px;
-  border: 1px solid #ff7147;
-  background: transparent;
-  color: #ff7147;
-  font-size: 17px;
+.file-field input {
+  display: block;
+  width: 100%;
+  font-size: 13px;
+}
+
+.file-field small {
+  display: block;
+  margin-top: 8px;
+  color: #777;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.slider-field output {
+  color: #666;
+  font-variant-numeric: tabular-nums;
+}
+
+.slider-field input {
+  display: block;
+  width: 100%;
+  accent-color: #4e5948;
+}
+
+button {
+  min-height: 40px;
+  padding: 0 15px;
+  border: 0;
+  border-radius: 3px;
+  background: #30352d;
+  color: white;
+  font: inherit;
+  font-size: 13px;
   cursor: pointer;
 }
 
-.primary-action {
-  background: #ff7147;
-  border-color: #ff7147;
-  color: #000;
+button:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
 
-.secondary-action {
-  border-color: #ff7147;
+.message {
+  min-height: 20px;
+  margin-top: 12px;
+  color: #666;
+  font-size: 12px;
+}
+
+@media (max-width: 480px) {
+  form {
+    padding-top: 36px;
+  }
 }
