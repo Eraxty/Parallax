@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: parallax
+    runtime: docker
+    dockerfilePath: ./Front/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
