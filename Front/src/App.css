@@ -18,7 +18,29 @@ header {
   text-decoration: none;
 }
 
-form {
+.tabs {
+  display: flex;
+  gap: 8px;
+  padding-top: 24px;
+}
+
+.tabs button {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  background: white;
+  color: #555;
+}
+
+.tabs button.active {
+  border-color: #30352d;
+  background: #30352d;
+  color: white;
+}
+
+form,
+.depth-tool {
   padding: 48px 0;
 }
 
@@ -88,6 +110,10 @@ button:disabled {
   cursor: wait;
 }
 
+.submit {
+  margin-top: 4px;
+}
+
 .message {
   min-height: 20px;
   margin-top: 12px;
@@ -95,8 +121,31 @@ button:disabled {
   font-size: 12px;
 }
 
+.depth-tool h1 {
+  margin-bottom: 20px;
+}
+
+.preview {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #eee;
+  background-repeat: no-repeat;
+}
+
+.camera {
+  display: none;
+}
+
+.camera-message {
+  margin: 10px 0 0;
+  color: #666;
+  font-size: 12px;
+}
+
 @media (max-width: 480px) {
-  form {
+  form,
+  .depth-tool {
     padding-top: 36px;
   }
 }
