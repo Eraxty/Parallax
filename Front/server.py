@@ -97,25 +97,22 @@ class Handler(BaseHTTPRequestHandler):
                     self.send_error(400, "Choose an image")
                     return
 
+                photo = Image.open(BytesIO(image)).convert("RGB")
+                width = 480
+                height = max(1, round(width * photo.height / photo.width))
+                photo = photo.resize((width, height), Image.Resampling.LANCZOS)
+
+                small_image = BytesIO()
+                photo.save(small_image, format = "PNG")
+
                 from depth import make_depth_map
 
-                depth = make_depth_map(image, "MiDaS_small")
-                photo = Image.open(BytesIO(image)).convert("RGB")
+                depth = make_depth_map(small_image.getvalue(), "MiDaS_small")
+                depth_map = np.asarray(Image.open(BytesIO(depth)).convert("L")) / 255
                 
-                depth_map = Image.open(BytesIO(depth)).convert("L")
-                
-                width = 480
-                
-                height = max(1, round(width * photo.height / photo.width))
-                
-                photo = np.asarray(photo.resize((width, height), Image.Resampling.LANCZOS))
-                
-                depth_map = np.asarray(depth_map.resize((width, height), Image.Resampling.BILINEAR)) / 255
-                
+                photo = np.asarray(photo)
                 x, y = np.meshgrid(np.arange(width), np.arange(height))
-                
                 views = []
-                
                 shift = 32
 
                 for index in range(9):
