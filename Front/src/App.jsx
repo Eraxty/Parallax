@@ -28,7 +28,8 @@ function App() {
     if (!preview.current) return
 
     const frame = Math.max(0, Math.min(8, Math.round(4 + amount)))
-    preview.current.style.backgroundPositionX = `${frame * 12.5}%`
+    preview.current.style.backgroundPositionX = `${0.88 + frame * 12.28}%`
+    preview.current.style.backgroundPositionY = '50%'
   }
 
   useEffect(() => {
@@ -55,7 +56,7 @@ function App() {
 
         if (!stopped && preview.current) {
           preview.current.style.backgroundImage = `url(${imageUrl})`
-          preview.current.style.backgroundSize = '900% 100%'
+          preview.current.style.backgroundSize = '1050% 116.7%'
           preview.current.style.aspectRatio = `${size.width / 9} / ${size.height}`
           showView(view.current)
           setPreviewMessage('')
@@ -204,7 +205,6 @@ function App() {
         <label className="file-field">
           <span>Images</span>
           <input name="images" type="file" accept="image/*" multiple />
-          <small>Choose two or more images</small>
         </label>
 
         <label className="slider-field">
@@ -260,7 +260,6 @@ function App() {
         />
         <video ref={camera} className="camera" playsInline muted />
         {previewMessage && <p className="camera-message">{previewMessage}</p>}
-        {!image && <p className="camera-message">Choose an image.</p>}
 
         <label className="file-field">
           <span>Image</span>
@@ -284,7 +283,7 @@ function App() {
         </label>
 
         <button disabled={!image} onClick={() => setTracking(!tracking)}>
-          {tracking ? 'Stop tracking' : 'Track my head'}
+          {tracking ? 'Stop' : 'Start'}
         </button>
       </section>
     </main>
