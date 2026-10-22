@@ -1,5 +1,6 @@
 from email import policy
 from email.parser import BytesParser
+from io import BytesIO
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import mimetypes
 import os
@@ -7,6 +8,9 @@ from pathlib import Path
 import sys
 import tempfile
 from urllib.parse import unquote, urlsplit
+
+import numpy as np
+from PIL import Image
 
 
 PROJECT = Path(__file__).resolve().parent.parent
@@ -21,10 +25,12 @@ SITE = Path(__file__).resolve().parent / "dist"
 class Handler(BaseHTTPRequestHandler):
     def send_text(self, status, body, content_type="text/plain; charset=utf-8"):
         data = body.encode("utf-8")
+
         self.send_response(status)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(data)))
         self.end_headers()
+
         self.wfile.write(data)
 
     def do_GET(self):
@@ -60,7 +66,8 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(data)
 
     def do_POST(self):
-        if urlsplit(self.path).path != "/interlace":
+        path = urlsplit(self.path).path
+        if path not in ("/interlace", "/depth-preview"):
             self.send_error(404)
             return
 
@@ -76,11 +83,59 @@ class Handler(BaseHTTPRequestHandler):
             images = []
             fields = {}
             for part in message.iter_parts():
-                name = part.get_param("name", header="content-disposition")
+                name = part.get_param("name", header = "content-disposition")
                 if name == "images":
-                    images.append(part.get_payload(decode=True))
+                    images.append(part.get_payload(decode = True))
+                elif name == "image":
+                    fields[name] = part.get_payload(decode = True)
                 elif name:
                     fields[name] = part.get_content().strip()
+
+            if path == "/depth-preview":
+                image = fields.get("image")
+                if not image:
+                    self.send_error(400, "Choose an image")
+                    return
+
+                from depth import make_depth_map
+
+                depth = make_depth_map(image, "MiDaS_small")
+                photo = Image.open(BytesIO(image)).convert("RGB")
+                
+                depth_map = Image.open(BytesIO(depth)).convert("L")
+                
+                width = 480
+                
+                height = max(1, round(width * photo.height / photo.width))
+                
+                photo = np.asarray(photo.resize((width, height), Image.Resampling.LANCZOS))
+                
+                depth_map = np.asarray(depth_map.resize((width, height), Image.Resampling.BILINEAR)) / 255
+                
+                x, y = np.meshgrid(np.arange(width), np.arange(height))
+                
+                views = []
+                
+                shift = 32
+
+                for index in range(9):
+                    amount = (index - 4) / 4
+                    source_x = np.clip(x - amount * shift * depth_map, 0, width - 1).astype(np.int32)
+                    views.append(photo[y, source_x])
+
+                sheet = np.concatenate(views, axis = 1)
+                output = BytesIO()
+
+                Image.fromarray(sheet).save(output, format = "PNG")
+                result = output.getvalue()
+
+                self.send_response(200)
+                self.send_header("Content-Type", "image/png")
+                self.send_header("Content-Length", str(len(result)))
+                self.end_headers()
+
+                self.wfile.write(result)
+                return
 
             if len(images) < 2:
                 self.send_error(400, "Choose at least two images")
@@ -107,7 +162,10 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(result)
         except Exception as error:
-            self.send_error(400, str(error))
+            if path == "/depth-preview":
+                self.send_text(400, str(error))
+            else:
+                self.send_error(400, str(error))
 
 
 if __name__ == "__main__":
