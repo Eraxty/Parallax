@@ -10,9 +10,9 @@
 [![Live site](https://img.shields.io/badge/live-eraxty.blitz.cloud-brightgreen)](https://eraxty.blitz.cloud/)
 ![Hackatime](https://hackatime.hackclub.com/api/v1/badge/U09JP15EVQU/Eraxty/Parallax)
 
-[Live site](https://eraxty.blitz.cloud/) • [Features](#features) • [Install](#installation) • [Usage](#usage) • [API](#api)
+[Live site](https://eraxty.blitz.cloud/) • [Features](#features) • [Install](#installation) • [Usage](#usage)
 
-<!-- ![Parallax](img/main.png) -->
+![Parallax](ss/main.png)
 
 </div>
 
@@ -59,8 +59,8 @@ The first depth preview downloads the MiDaS model through `torch.hub`, so it nee
 ![browse](image.png) 
 
 2) select 2 or more images 
-3) chage the sliders according to your sheet
-4) download image
+3) change the sliders according to your sheet
+4) click Create image
 
 ## Credits
 - Depth estimation: [MiDaS](https://github.com/isl-org/MiDaS)
