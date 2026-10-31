@@ -7,10 +7,10 @@
 ![Node](https://img.shields.io/badge/node-22%2B-339933?logo=node.js&logoColor=white)
 ![React](https://img.shields.io/badge/react-19-61DAFB?logo=react&logoColor=black)
 ![ONNX Runtime](https://img.shields.io/badge/onnxruntime-Depth%20Anything%20V2-005CED?logo=onnx&logoColor=white)
-[![Live site](https://img.shields.io/badge/live-eraxty.blitz.cloud-brightgreen)](https://eraxty.blitz.cloud/)
+[![Live site](https://img.shields.io/badge/live-parallax--front--psi.vercel.app-brightgreen)](https://parallax-front-psi.vercel.app/)
 ![Hackatime](https://hackatime.hackclub.com/api/v1/badge/U09JP15EVQU/Eraxty/Parallax)
 
-[Live site](https://eraxty.blitz.cloud/) • [Features](#features) • [Install](#installation) • [Usage](#usage)
+[Live site](https://parallax-front-psi.vercel.app/) • [Features](#features) • [Install](#installation) • [Usage](#usage)
 
 ![Parallax](ss/main.png)
 
@@ -30,7 +30,7 @@ Soo i once saw a video about a lenovo laptop and how it was hands free 3d displa
 
 ## Installation
 
-Use it [Here](https://eraxty.blitz.cloud/).
+Use it [Here](https://parallax-front-psi.vercel.app/).
 
 ## Local
 You need:
