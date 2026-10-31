@@ -6,7 +6,7 @@
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![Node](https://img.shields.io/badge/node-22%2B-339933?logo=node.js&logoColor=white)
 ![React](https://img.shields.io/badge/react-19-61DAFB?logo=react&logoColor=black)
-![PyTorch](https://img.shields.io/badge/pytorch-MiDaS-EE4C2C?logo=pytorch&logoColor=white)
+![ONNX Runtime](https://img.shields.io/badge/onnxruntime-Depth%20Anything%20V2-005CED?logo=onnx&logoColor=white)
 [![Live site](https://img.shields.io/badge/live-eraxty.blitz.cloud-brightgreen)](https://eraxty.blitz.cloud/)
 ![Hackatime](https://hackatime.hackclub.com/api/v1/badge/U09JP15EVQU/Eraxty/Parallax)
 
@@ -44,13 +44,18 @@ git clone https://github.com/Eraxty/Parallax
 cd Parallax
 python -m venv .venv
 source .venv/bin/activate
-pip install -r Front/requirements.txt
+pip install -r requirements.txt
 cd Front
 npm install
 npm run dev
 ```
 
-The first depth preview downloads the MiDaS model through `torch.hub`, so it needs internet and takes time.
+The first depth preview downloads the Depth Anything V2 model (about 27 MB), so it needs internet and takes a moment.
+
+## Deploy
+Parallax runs on [Vercel](https://vercel.com/new): the React site is static and the Python backend runs as Vercel Functions from `api/`. Import the repo, leave the Root Directory as the repo root, and deploy. `vercel.json` handles the rest.
+
+Vercel limits uploads and responses to 4.5 MB, so keep the images you interlace small enough.
 
 
 ## Usage
@@ -63,7 +68,7 @@ The first depth preview downloads the MiDaS model through `torch.hub`, so it nee
 4) click Create image
 
 ## Credits
-- Depth estimation: [MiDaS](https://github.com/isl-org/MiDaS)
+- Depth estimation: [Depth Anything V2](https://github.com/DepthAnything/Depth-Anything-V2) through [ONNX Runtime](https://onnxruntime.ai)
 - Face tracking: [MediaPipe Face Landmarker](https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker)
 - Eye tracking (prototype): [screen-eye-tracking](https://github.com/PINTO0309/screen-eye-tracking)
 

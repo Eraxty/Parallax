@@ -1,52 +1,66 @@
 from io import BytesIO
 from pathlib import Path
+import tempfile
 import threading
+from urllib.request import urlretrieve
 
-import cv2
 import numpy as np
-import torch
+import onnxruntime
 from PIL import Image
 
 
-models = {}
+MODEL_URL = "https://huggingface.co/onnx-community/depth-anything-v2-small/resolve/main/onnx/model_quantized.onnx"
+MODEL_PATH = Path(tempfile.gettempdir()) / "depth-anything-v2-small-q8.onnx"
+MODEL_SIZE = 518
+MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
+STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
+
+session = None
 model_lock = threading.Lock()
 
 
-def load_model(name):
-    if name not in models:
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        model = torch.hub.load("intel-isl/MiDaS", name, trust_repo = True)
-        model.to(device).eval()
+def load_model():
+    global session
 
-        transforms = torch.hub.load("intel-isl/MiDaS", "transforms", trust_repo = True)
-        if name == "MiDaS_small":
-            transform = transforms.small_transform
-        else:
-            transform = transforms.dpt_transform
+    if session is None:
+        if not MODEL_PATH.exists():
+            download = MODEL_PATH.with_suffix(".part")
+            urlretrieve(MODEL_URL, download)
+            download.replace(MODEL_PATH)
 
-        models[name] = model, transform, device
+        session = onnxruntime.InferenceSession(str(MODEL_PATH), providers=["CPUExecutionProvider"])
 
-    return models[name]
+    return session
 
 
-def make_depth_map(image_data, model_name="DPT_Large"):
+def model_input_size(width, height):
+    scale_width = MODEL_SIZE / width
+    scale_height = MODEL_SIZE / height
+
+    if abs(1 - scale_width) < abs(1 - scale_height):
+        scale = scale_width
+    else:
+        scale = scale_height
+
+    def multiple_of_14(value):
+        return max(14, round(value * scale / 14) * 14)
+
+    return multiple_of_14(width), multiple_of_14(height)
+
+
+def make_depth_map(image_data):
     image = Image.open(BytesIO(image_data)).convert("RGB")
-    pixels = np.asarray(image)
+
+    pixels = image.resize(model_input_size(*image.size), Image.Resampling.BICUBIC)
+    pixels = (np.asarray(pixels, dtype=np.float32) / 255 - MEAN) / STD
+    pixels = pixels.transpose(2, 0, 1)[np.newaxis]
 
     with model_lock:
-        model, transform, device = load_model(model_name)
+        model = load_model()
+        prediction = model.run(None, {"pixel_values": pixels})[0][0]
 
-        with torch.no_grad():
-            prediction = model(transform(pixels).to(device))
-
-            prediction = torch.nn.functional.interpolate(
-                prediction.unsqueeze(1),
-                size = (image.height, image.width),
-                mode = "bicubic",
-                align_corners = False,
-            ).squeeze()
-
-    depth = prediction.cpu().numpy()
+    depth = Image.fromarray(prediction.astype(np.float32))
+    depth = np.asarray(depth.resize(image.size, Image.Resampling.BICUBIC))
     low = depth.min()
     high = depth.max()
 

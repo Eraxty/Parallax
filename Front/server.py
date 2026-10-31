@@ -67,7 +67,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         path = urlsplit(self.path).path
-        if path not in ("/interlace", "/depth-preview"):
+        if path not in ("/api/interlace", "/api/depth-preview"):
             self.send_error(404)
             return
 
@@ -91,7 +91,7 @@ class Handler(BaseHTTPRequestHandler):
                 elif name:
                     fields[name] = part.get_content().strip()
 
-            if path == "/depth-preview":
+            if path == "/api/depth-preview":
                 image = fields.get("image")
                 if not image:
                     self.send_error(400, "Choose an image")
@@ -107,7 +107,7 @@ class Handler(BaseHTTPRequestHandler):
 
                 from depth import make_depth_map
 
-                depth = make_depth_map(small_image.getvalue(), "MiDaS_small")
+                depth = make_depth_map(small_image.getvalue())
                 depth_map = np.asarray(Image.open(BytesIO(depth)).convert("L")) / 255
                 
                 photo = np.asarray(photo)
@@ -123,11 +123,12 @@ class Handler(BaseHTTPRequestHandler):
                 sheet = np.concatenate(views, axis = 1)
                 output = BytesIO()
 
-                Image.fromarray(sheet).save(output, format = "PNG")
+                # JPEG keeps the sheet under Vercel's 4.5 MB response limit
+                Image.fromarray(sheet).save(output, format = "JPEG", quality = 90)
                 result = output.getvalue()
 
                 self.send_response(200)
-                self.send_header("Content-Type", "image/png")
+                self.send_header("Content-Type", "image/jpeg")
                 self.send_header("Content-Length", str(len(result)))
                 self.end_headers()
 
@@ -159,7 +160,7 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(result)
         except Exception as error:
-            if path == "/depth-preview":
+            if path == "/api/depth-preview":
                 self.send_text(400, str(error))
             else:
                 self.send_error(400, str(error))

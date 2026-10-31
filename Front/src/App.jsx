@@ -4,6 +4,22 @@ import './App.css'
 const wasmPath = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.1/wasm'
 const faceModel = 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task'
 
+const uploadLimit = 4.4 * 1024 * 1024
+const tooBig = 'Images are too big for the server (4.5 MB max). Try smaller images.'
+
+async function shrinkImage(file) {
+  const bitmap = await createImageBitmap(file)
+  const scale = Math.min(1, 960 / bitmap.width)
+  const canvas = document.createElement('canvas')
+
+  canvas.width = Math.round(bitmap.width * scale)
+  canvas.height = Math.round(bitmap.height * scale)
+  canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+  bitmap.close()
+
+  return new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.95))
+}
+
 function App() {
   const [mode, setMode] = useState('interlace')
   const [lpi, setLpi] = useState(60)
@@ -42,9 +58,9 @@ function App() {
       try {
         const form = new FormData()
     
-        form.append('image', image)
+        form.append('image', await shrinkImage(image))
     
-        const response = await fetch('/depth-preview', { method: 'POST', body: form })
+        const response = await fetch('/api/depth-preview', { method: 'POST', body: form })
     
         if (!response.ok) throw new Error('Image processing failed.')
 
@@ -145,13 +161,21 @@ function App() {
       setMessage('Choose at least two images.')
       return
     }
+    if (images.reduce((total, file) => total + file.size, 0) > uploadLimit) {
+      setMessage(tooBig)
+      return
+    }
 
     setBusy(true)
     setMessage('')
 
     try {
-      const response = await fetch('/interlace', { method: 'POST', body: form })
-      if (!response.ok) throw new Error(`Request failed (${response.status}).`)
+      const response = await fetch('/api/interlace', { method: 'POST', body: form })
+      if (!response.ok) {
+        const error = await response.text()
+        if (response.status === 413 || error.includes('PAYLOAD_TOO_LARGE')) throw new Error(tooBig)
+        throw new Error(`Request failed (${response.status}).`)
+      }
 
       const url = URL.createObjectURL(await response.blob())
       const link = document.createElement('a')

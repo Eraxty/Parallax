@@ -18,7 +18,7 @@ If you are developing a production application, we recommend using TypeScript wi
 
 ## Run locally
 
-Install the Python packages in `requirements.txt`, run `npm install`, then start both servers with:
+Install the Python packages in the repository's `requirements.txt`, run `npm install`, then start both servers with:
 
 ```sh
 npm run dev
@@ -28,11 +28,4 @@ Open the Vite address it prints. Python handles image processing.
 
 ## Run as a website
 
-Build and run the single app container from the repository root:
-
-```sh
-docker build -f Front/Dockerfile -t parallax .
-docker run --rm -p 8000:8000 parallax
-```
-
-The Python server serves the built site and processes `/interlace` uploads. Deploy this container to a host that runs Docker to make it available on the web.
+The site deploys to Vercel from the repository root. Vercel serves the built site, and `api/interlace.py` and `api/depth-preview.py` run the same Python handler from `server.py` as Vercel Functions.
